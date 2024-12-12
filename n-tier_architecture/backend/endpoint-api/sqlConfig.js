@@ -1,8 +1,8 @@
 var dbconfig = {
     development: {
-        server: '192.168.56.9',
-        database:'team1_engse207_db',
-        user:'team1',
+        server: '10.21.43.203',
+        database:'team2_engse207_db',
+        user:'team2',
         password:'P@ssw0rd',
         port: 1433,
         options:{
