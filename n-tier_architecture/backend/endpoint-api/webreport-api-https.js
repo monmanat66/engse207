@@ -6,8 +6,9 @@ let cors = require('cors');
 
 const OnlineAgent = require('./repository/OnlineAgent');
 
+const apiconfig = require('./apiconfig').development;
 
-
+console.dir("apiconfig: "+JSON.stringify(apiconfig));
 //-------------------------------------
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -15,6 +16,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const apiport = 8443
 
 var url = require('url');
+// const apiconfig = require('./apiconfig');
+// const { development } = require('./sqlConfig');
 
 //---------------- Websocket Part1 Start -----------------------
 
@@ -151,7 +154,7 @@ const init = async () => {
 
             // here is where you validate your token
             // comparing with token from your database for example
-            const isValid = token === '1aaZ!ARgAQGuQzp00D5D000000.mOv2jmhXkfIsjgywpCIh7.HZpc6vED1LCbc90DTaVDJwdNqbTW5r4uZicv8AFfkOE1ialqnR8UN5.wnAgh090h';
+            const isValid = token === apiconfig.serverKey;
 
             const credentials = { token };
             const artifacts = { test: 'info' };
@@ -164,6 +167,7 @@ const init = async () => {
 
     //-- Route ------
 
+    //เก็ต
     server.route({
         method: 'GET',
         path: '/',
@@ -191,7 +195,7 @@ const init = async () => {
     //-------- Code continue here -------------------
 
  
-
+    //เก็ตออนไลน์เอเจน
     server.route({
         method: 'GET',
         path: '/api/v1/getOnlineAgentByAgentCode',
@@ -237,6 +241,7 @@ const init = async () => {
                         errMessage: "Agent not found."
                     }).code(404);
                 }
+                
     
                 // ตรวจสอบสถานะการตอบกลับจาก Repository
                 switch (responsedata.statusCode) {
@@ -276,7 +281,7 @@ const init = async () => {
     
 
 
-
+    //โพสออนไลน์เอเจน
     server.route({
         method: 'POST',
         path: '/api/v1/postOnlineAgentStatus',
@@ -363,7 +368,87 @@ const init = async () => {
             }
         }
     });
-    
+    //  ส่งข้อความ
+    server.route({
+        method: 'POST',
+        path: '/api/v1/postSendMessage',
+        config: {
+            cors: {
+                origin: [
+                    '*'
+                ],
+                headers: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"],
+                additionalHeaders: ["Access-Control-Allow-Headers: Origin, Content-Type, x-ms-request-id , Authorization"],
+                credentials: true
+            },
+            payload: {
+                parse: true,
+                allow: ['application/json', 'multipart/form-data'],
+                multipart: true  // <== this is important in hapi 19
+            }
+        },
+        handler: async (request, h) => {
+            let param = request.payload;
+
+            const FromAgentCode = param.FromAgentCode;
+            const ToAgentCode = param.ToAgentCode;
+            const Message = param.Message;
+            var d = new Date();
+
+            // const fromAgent = await getOnlineAgentByAgentCode(FromAgentCode);
+            // const toAgent = await getOnlineAgentByAgentCode(ToAgentCode);
+
+            console.log("Current Date:", d);
+            console.log("FromAgentCode:", FromAgentCode);
+            console.log("ToAgentCode:", ToAgentCode);
+            console.log("Message:", Message);
+
+            try {
+
+                if ((param.FromAgentCode == null) || (param.ToAgentCode == null))
+                    return h.response("Please provide AgentCode.").code(400);
+                else {
+
+                    //---------------- Websocket -----------------------------
+
+                    if (clientWebSockets[ToAgentCode]) {
+
+                        clientWebSockets[ToAgentCode].send(JSON.stringify({
+                            MessageType: '5',
+                            FromAgentCode: FromAgentCode,
+                            ToAgentCode: ToAgentCode,
+                            DateTime: d.toLocaleString('en-US'),
+                            Message: Message,
+                        }));
+
+                        return ({
+                            error: false,
+                            statusCode: 200,
+                            message: "Message has been set from "+FromAgentCode+" to "+ToAgentCode,
+                        });
+
+                    }
+                    else
+                        return h.response({
+                                error: true,
+                                statusCode: 404,
+                                errMessage: "Agent not found, can not send message to agent."
+                            }).code(404);
+
+                    //---------------- Websocket -----------------------------
+
+
+
+                }
+
+            } catch (err) {
+                console.dir(err)
+            }
+
+        }
+
+    });
+
 
 
 
