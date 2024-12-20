@@ -3,6 +3,7 @@ let express = require('express');
 const AuthBearer = require('hapi-auth-bearer-token');
 let fs = require('fs');
 let cors = require('cors');
+const WebSocket = require('ws');
 
 const OnlineAgent = require('./repository/OnlineAgent');
 
@@ -353,14 +354,21 @@ const init = async () => {
 
                         return ({
                             error: false,
-                            message: "Message has been set.",
+                            statusCode: 200,
+                            message: "Message has been set from "+FromAgentCode+" to "+ToAgentCode,
                         });
 
                     }
                     else
-                        return h.response("Agent not found, can not send message to agent.").code(404);
+                        return h.response({
+                                error: true,
+                                statusCode: 404,
+                                errMessage: "Agent not found, can not send message to agent."
+                            }).code(404);
 
                     //---------------- Websocket -----------------------------
+
+
 
                 }
 

@@ -135,11 +135,54 @@ async function deleteOnlineAgent(AgentCode) {
     }
 
 }
+async function postSendMessage(agentCode, message) {
+
+    try {
+        // ค้นหาข้อมูลของ agent ที่มีรหัสตัวแทน
+        let pool = await sql.connect(sqlConfig);
+        let result = await pool.request().query(`SELECT * FROM [OnlineAgents] WHERE [agent_code] = '${agentCode}'`);
+
+        if (!result || result.recordsets[0].length === 0) {
+            return ({
+                error: true,
+                statusCode: 404,
+                errMessage: 'Agent not found',
+            });
+        }
+
+        // สมมติว่าเราใช้ WebSocket ในการส่งข้อความ
+        const agentSocket = getAgentSocket(agentCode); // ฟังก์ชันนี้ต้องเชื่อมโยงกับ WebSocket หรือข้อมูลเชื่อมต่อที่เกี่ยวข้อง
+        if (agentSocket) {
+            agentSocket.send(message); // ส่งข้อความไปยัง agent
+            return ({
+                error: false,
+                statusCode: 200,
+                data: 'Message sent to agent successfully',
+            });
+        } else {
+            return ({
+                error: true,
+                statusCode: 400,
+                errMessage: 'Agent is not connected to WebSocket',
+            });
+        }
+
+    } catch (error) {
+        console.log(error);
+        return ({
+            error: true,
+            statusCode: 500,
+            errMessage: 'An internal server error occurred',
+        });
+    }
+}
+
 
 module.exports.OnlineAgentRepo = {
 
     getOnlineAgentByAgentCode: getOnlineAgentByAgentCode,
     postOnlineAgentStatus: postOnlineAgentStatus,
-    deleteOnlineAgent: deleteOnlineAgent
+    deleteOnlineAgent: deleteOnlineAgent,
+    postSendMessage:postSendMessage
 }
 
