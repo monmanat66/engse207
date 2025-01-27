@@ -107,34 +107,6 @@ async function postOnlineAgentStatus(AgentCode, AgentName, IsLogin, AgentStatus)
 
 }
 
-async function deleteOnlineAgent(AgentCode) {
-
-    try {
-
-        let result = await pool.request().query(`SELECT * FROM [OnlineAgents] WHERE [agent_code] = '${agentcode}'`); //@agentcode
-
-        if (!result || result.recordsets[0].length === 0) {
-
-            return ({
-                error: true,
-                errMessage: 'No agent online to delete !!',
-            });
-
-        } else {
-
-            return ({
-                error: false,
-                Message: 'Agent online was deleted !!',
-            });
-        }
-
-
-    } catch (error) {
-        console.log(error);
-        //callBack(error);
-    }
-
-}
 // async function postSendMessage(agentCode, message) {
 
 //     try {
@@ -181,7 +153,6 @@ async function deleteOnlineAgent(AgentCode) {
 module.exports.OnlineAgentRepo = {
 
     getOnlineAgentByAgentCode: getOnlineAgentByAgentCode,
-    postOnlineAgentStatus: postOnlineAgentStatus,
-    deleteOnlineAgent: deleteOnlineAgent,
+    postOnlineAgentStatus: postOnlineAgentStatus
 }
 

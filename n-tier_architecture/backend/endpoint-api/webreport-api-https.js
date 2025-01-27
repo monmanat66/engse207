@@ -7,8 +7,10 @@ let cors = require('cors');
 const OnlineAgent = require('./repository/OnlineAgent');
 
 const apiconfig = require('./apiconfig').development;
+//const {development} = require('./apiconfig));
 
-console.dir("apiconfig: "+JSON.stringify(apiconfig));
+
+console.log("apiconfig: "+JSON.stringify(apiconfig));
 //-------------------------------------
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -16,10 +18,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const apiport = 8443
 
 var url = require('url');
-// const apiconfig = require('./apiconfig');
-// const { development } = require('./sqlConfig');
-
-//---------------- Websocket Part1 Start -----------------------
+const { development } = require('./sqlConfig');
 
 var webSocketServer = new (require('ws')).Server({
     port: (process.env.PORT || 3071)
@@ -92,7 +91,6 @@ webSocketServer.on('connection', (ws, req) => {
 
 });
 
-//---------------- Websocket Part1 End -----------------------
 
 //init Express
 var app = express();
@@ -154,8 +152,8 @@ const init = async () => {
 
             // here is where you validate your token
             // comparing with token from your database for example
-            const isValid = token === apiconfig.serverKey;
-
+            //const isValid = token === '1aaZ!ARgAQGuQzp00D5D000000.mOv2jmhXkfIsjgywpCIh7.HZpc6vED1LCbc90DTaVDJwdNqbTW5r4uZicv8AFfkOE1ialqnR8UN5.wnAgh090h';
+            const isValid = token === apiconfig.serverKey
             const credentials = { token };
             const artifacts = { test: 'info' };
 
@@ -167,7 +165,6 @@ const init = async () => {
 
     //-- Route ------
 
-    //เก็ต
     server.route({
         method: 'GET',
         path: '/',
@@ -192,183 +189,147 @@ const init = async () => {
         }
     });
 
-    //-------- Code continue here -------------------
+    //-------- Code continue here -----------------xxx--
 
  
-    //เก็ตออนไลน์เอเจน
+
     server.route({
         method: 'GET',
         path: '/api/v1/getOnlineAgentByAgentCode',
         config: {
             cors: {
-                origin: ['*'],
-                headers: [
-                    "Access-Control-Allow-Headers", 
-                    "Access-Control-Allow-Origin", 
-                    "Accept", 
-                    "Authorization", 
-                    "Content-Type", 
-                    "If-None-Match", 
-                    "Accept-language"
+                origin: [
+                    '*'
                 ],
-                additionalHeaders: [
-                    "Access-Control-Allow-Headers: Origin, Content-Type, x-ms-request-id, Authorization"
-                ],
+                headers: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"],
+                additionalHeaders: ["Access-Control-Allow-Headers: Origin, Content-Type, x-ms-request-id , Authorization"],
                 credentials: true
             }
         },
         handler: async (request, h) => {
-            const param = request.query;
-    
+            let param = request.query;
+
             try {
-                // ตรวจสอบว่า agentcode ถูกส่งมาหรือไม่
-                if (!param.agentcode) {
-                    return h.response({
-                        error: true,
-                        statusCode: 400,
-                        errMessage: "Please provide agentcode."
-                    }).code(400);
-                }
-    
-                // ดึงข้อมูล OnlineAgent จาก Repository
-                const responsedata = await OnlineAgent.OnlineAgentRepo.getOnlineAgentByAgentCode(param.agentcode);
-    
-                // ตรวจสอบ response จาก Repository
-                if (!responsedata) {
-                    return h.response({
-                        error: true,
-                        statusCode: 404,
-                        errMessage: "Agent not found."
-                    }).code(404);
-                }
-                
-    
-                // ตรวจสอบสถานะการตอบกลับจาก Repository
-                switch (responsedata.statusCode) {
-                    case 200:
-                        return h.response({
-                            error: false,
-                            statusCode: 200,
-                            data: responsedata.data
-                        }).code(200);
-    
-                    case 404:
-                        return h.response({
-                            error: true,
-                            statusCode: 404,
-                            errMessage: "Agent not found."
-                        }).code(404);
-    
-                    case 500:
-                    default:
-                        return h.response({
-                            error: true,
-                            statusCode: 500,
-                            errMessage: "Something went wrong. Please try again later."
-                        }).code(500);
+
+                param.agentcode
+                if (param.agentcode == null)
+                    return h.response("Please provide agentcode.").code(400);
+                else {
+
+                    const responsedata = await OnlineAgent.OnlineAgentRepo.getOnlineAgentByAgentCode(`${param.agentcode}`);
+
+                    if (responsedata.statusCode == 500)
+                        return h.response("Something went wrong. Please try again later.").code(500);
+                    else
+                        if (responsedata.statusCode == 200)
+                            return responsedata;
+                        else
+                            if (responsedata.statusCode == 404)
+                                return h.response(responsedata).code(404);
+                            else
+                                return h.response("Something went wrong. Please try again later.").code(500);
+
                 }
             } catch (err) {
-                console.error("Error fetching agent details:", err);
-                return h.response({
-                    error: true,
-                    statusCode: 500,
-                    errMessage: "An internal server error occurred."
-                }).code(500);
+                console.dir(err)
             }
         }
+
     });
-    
-    
 
 
-    //โพสออนไลน์เอเจน
+
     server.route({
         method: 'POST',
         path: '/api/v1/postOnlineAgentStatus',
         config: {
             cors: {
-                origin: ['*'],
-                headers: [
-                    "Access-Control-Allow-Headers", 
-                    "Access-Control-Allow-Origin", 
-                    "Accept", 
-                    "Authorization", 
-                    "Content-Type", 
-                    "If-None-Match", 
-                    "Accept-language"
+                origin: [
+                    '*'
                 ],
-                additionalHeaders: [
-                    "Access-Control-Allow-Headers: Origin, Content-Type, x-ms-request-id, Authorization"
-                ],
+                headers: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"],
+                additionalHeaders: ["Access-Control-Allow-Headers: Origin, Content-Type, x-ms-request-id , Authorization"],
                 credentials: true
             },
             payload: {
                 parse: true,
                 allow: ['application/json', 'multipart/form-data'],
-                multipart: true // สำหรับรองรับ multipart payload
+                multipart: true  // <== this is important in hapi 19
             }
         },
         handler: async (request, h) => {
-            const param = request.payload;
-    
-            const { AgentCode, AgentName, IsLogin, AgentStatus } = param;
-            const updatedAt = new Date();
-    
+            let param = request.payload;
+
+            const AgentCode = param.AgentCode;
+            const AgentName = param.AgentName;
+            const IsLogin = param.IsLogin;
+            const AgentStatus = param.AgentStatus;
+            var d = new Date();
+
             try {
-                // ตรวจสอบว่า AgentCode ถูกส่งมาหรือไม่
-                if (!AgentCode) {
+
+                if (param.AgentCode == null)
+                    //return h.response("Please provide agentcode.").code(400);
+
                     return h.response({
-                        error: true,
-                        statusCode: 400,
-                        errMessage: "Please provide agentcode."
+                        "error": true,
+                        "statusCode": 400,
+                        "errMessage": "Please provide agentcode."
                     }).code(400);
+
+                else {
+
+                    const responsedata = await OnlineAgent.OnlineAgentRepo.postOnlineAgentStatus(AgentCode, AgentName, IsLogin, AgentStatus);
+
+
+                    if (!responsedata.error) {
+                        if (clientWebSockets[AgentCode]) {
+
+                            clientWebSockets[AgentCode].send(JSON.stringify({
+                                MessageType: '4',
+                                AgentCode: AgentCode,
+                                AgentName: AgentName,
+                                IsLogin: IsLogin,
+                                AgentStatus: AgentStatus,
+                                DateTime: d.toLocaleString('en-US'),
+                            }));
+
+                            return ({
+                                error: false,
+                                message: "Agent status has been set.",
+                            });
+
+                        }
+                    }
+
+
+
+                    
+
+                    if (responsedata.statusCode == 200)
+                        return responsedata;
+                    else
+                        if (responsedata.statusCode == 404)
+                            return h.response(responsedata).code(404);
+                        else
+                            return h.response("Something went wrong. Please try again later.").code(500);
+
                 }
-                // throw new Error("Simulated internal server error");
-    
-                // เรียกใช้ Repository เพื่ออัพเดตสถานะของ Agent
-                const responsedata = await OnlineAgent.OnlineAgentRepo.postOnlineAgentStatus(
-                    AgentCode, 
-                    AgentName, 
-                    IsLogin, 
-                    AgentStatus, 
-                    updatedAt
-                );
-    
-                // ตรวจสอบผลลัพธ์จาก Repository
-                switch (responsedata.statusCode) {
-                    case 200:
-                        return h.response({
-                            error: false,
-                            statusCode: 200,
-                            message: "Agent status updated successfully.",
-                            data: responsedata.data
-                        }).code(200);
-    
-                    case 404:
-                        return h.response({
-                            error: true,
-                            statusCode: 404,
-                            errMessage: "Agent not found."
-                        }).code(404);
-    
-                    default:
-                        return h.response({
-                            error: true,
-                            statusCode: 500,
-                            errMessage: "Something went wrong. Please try again later."
-                        }).code(500);
-                }
+
             } catch (err) {
-                console.error("Error updating agent status:", err);
-                return h.response({
-                    error: true,
-                    statusCode: 500,
-                    errMessage: "An internal server error occurred."
-                }).code(500);
+                console.dir(err)
             }
+
         }
+
     });
-    //  ส่งข้อความ
+
+
+
+    //----------------------------------------------
+
+
+
     server.route({
         method: 'POST',
         path: '/api/v1/postSendMessage',
@@ -394,11 +355,8 @@ const init = async () => {
             const ToAgentCode = param.ToAgentCode;
             const Message = param.Message;
             var d = new Date();
-
-            // const fromAgent = await getOnlineAgentByAgentCode(FromAgentCode);
-            // const toAgent = await getOnlineAgentByAgentCode(ToAgentCode);
-
-            console.log("Current Date:", d);
+            
+             console.log("Current Date:", d);
             console.log("FromAgentCode:", FromAgentCode);
             console.log("ToAgentCode:", ToAgentCode);
             console.log("Message:", Message);
@@ -435,9 +393,6 @@ const init = async () => {
                                 errMessage: "Agent not found, can not send message to agent."
                             }).code(404);
 
-                    //---------------- Websocket -----------------------------
-
-
 
                 }
 
@@ -449,10 +404,42 @@ const init = async () => {
 
     });
 
+    server.route({
+        method: 'POST',
+        path: '/api/v1/deleteOnlineAgent',
+        config: {
+            cors: {
+                origin: [
+                    '*'
+                ],
+                headers: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"],
+                additionalHeaders: ["Access-Control-Allow-Headers: Origin, Content-Type, x-ms-request-id , Authorization"],
+                credentials: true
+            },
+            payload: {
+                parse: true,
+                allow: ['application/json', 'multipart/form-data'],
+                multipart: true  // <== this is important in hapi 19
+            }
+        },
+        handler: async (request, h) => {
+            let param = request.payload;
 
+            const AgentCode = param.AgentCode;
 
+            try {
 
-    //----------------------------------------------
+                const responsedata = await OnlineAgent.OnlineAgentRepo.deleteOnlineAgent(AgentCode);
+
+                return responsedata;
+
+            } catch (err) {
+                console.dir(err)
+            }
+
+        }
+
+    });
 
     await server.start();
     console.log('Webreport API Server running on %s', server.info.uri);
@@ -465,5 +452,3 @@ process.on('unhandledRejection', (err) => {
 });
 
 init();
-
-    //------ End of webreport-api-https.js---------
