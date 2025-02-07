@@ -1,0 +1,8 @@
+{"level":"error","message":"Invalid key(s) found in Parse Server configuration: allowExpriredAuthDataToken","timestamp":"2025-02-07T09:31:58.685Z"}
+{"level":"error","message":"Invalid key(s) found in Parse Server configuration: useMasterKey","timestamp":"2025-02-07T10:02:38.485Z"}
+{"error":{"code":13,"codeName":"Unauthorized","ok":0},"level":"error","message":"Received unauthorized error","timestamp":"2025-02-07T10:22:59.871Z"}
+{"error":{"code":13,"codeName":"Unauthorized","ok":0},"level":"error","message":"Received unauthorized error","timestamp":"2025-02-07T10:29:35.084Z"}
+{"error":{"code":13,"codeName":"Unauthorized","ok":0},"level":"error","message":"Received unauthorized error","timestamp":"2025-02-07T10:30:30.374Z"}
+{"error":{"code":13,"codeName":"Unauthorized","ok":0},"level":"error","message":"Received unauthorized error","timestamp":"2025-02-07T10:30:43.485Z"}
+{"error":{"code":13,"codeName":"Unauthorized","ok":0},"level":"error","message":"Received unauthorized error","timestamp":"2025-02-07T10:31:02.360Z"}
+{"error":{"code":13,"codeName":"Unauthorized","ok":0},"level":"error","message":"Received unauthorized error","timestamp":"2025-02-07T10:31:20.914Z"}
