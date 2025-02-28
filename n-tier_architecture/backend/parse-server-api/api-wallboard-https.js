@@ -26,9 +26,11 @@ const config = {
     javascriptKey: 'wallboardapi',
     serverURL: 'https://localhost:' + apiport + '/api', // Don't forget to change to https if needed
     publicServerURL: 'https://localhost:' + apiport + '/api',
+    
     liveQuery: {
       classNames: ['OnlineAgentLists', 'WallboardBanners','CallAgentSummaries'], // List of classes to support for query subscriptions
     },
+
     //masterKeyIps: ['0.0.0.0/0'],
     masterKeyIps: ["0.0.0.0/0", "::/0"],
     useMasterKey: true,
@@ -46,18 +48,19 @@ const config = {
   app.use('/', express.static(path.join(__dirname, '/wallboard')));
 
   // Serve the Parse API on the /parse URL prefix
-  const mountPath = '/api';
-  const api = new ParseServer(config);
-  
-  // 3. Start up Parse Server asynchronously
-   api.start();
+const mountPath = "/api";
+const api = new ParseServer(config);
 
-  app.use(mountPath, api.app);
+// 3. Start up Parse Server asynchronously
+api.start();
 
-  var httpsServer = require('https').createServer(options, app);
+app.use(mountPath, api.app);
 
-  httpsServer.listen(apiport, function() {   
-     console.log('3CX Wallboard API (htts) running on port ' + apiport + '.');
-  });
+var httpsServer = require("https").createServer(options, app);
 
- ParseServer.createLiveQueryServer(httpsServer);
+httpsServer.listen(apiport, function () {
+  console.log("Wallboard API (https) running on port " + apiport + ".");
+});
+
+ParseServer.createLiveQueryServer(httpsServer);
+
