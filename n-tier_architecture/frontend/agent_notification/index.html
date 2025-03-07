@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="./assets/css/style.css" media="screen" charset="utf-8" />
 
     <!----------- Code here -------------->
-
+      
     <script language="JavaScript">
 
         const {
@@ -25,6 +25,11 @@
         const $ = require("jquery");
         const Timer = require("easytimer.js").Timer;
         const timer = new Timer();
+        //const apiConfig = require("apiconfig.js").development;
+        const apiConfig = require("./apiconfig.js");
+        const devAPI = apiConfig.development;
+        console.log(devAPI);
+        
 
         var AgentCode;
         var agentStatusID;
@@ -36,8 +41,20 @@
         let statusLabel;
 
         //--Dev Server------------------------------
-        var APIServer = "https://localhost:8443/api/v1";
-        var WebSecketServer = "ws://localhost:3071";
+        // var APIServer = "https://localhost:8443/api/v1";
+        // var WebSecketServer = "ws://localhost:3071";
+
+        var APIServer = devAPI.endpointAPI;
+        var WebSecketServer = devAPI.endpointWS;
+
+        var parseServer = devAPI.parseServerAPI;
+        var WebSecketParse= devAPI.parseServerWS;
+
+        // devAPI.masterKey
+        // devAPI.cliientKey
+        // devAPI.javascriptKey
+        // devAPI.appId
+        
 
         //--Staging Server------------------------------
         //var APIServer = "https://lab-api.se-rmutl.net/engse207/api/v1";
@@ -240,6 +257,11 @@
 
         }
         function checkInput(status) {
+            if (status === 'on') {
+        // เมื่อการล็อกอินสำเร็จ ให้ซ่อนส่วนที่เกี่ยวกับการล็อกอิน และแสดงส่วนอื่นๆ
+        document.getElementById("display").style.display = "none"; // ซ่อนส่วนล็อกอิน
+        document.getElementById("otherContent").style.display = "block"; // แสดงส่วนอื่นๆ
+    }
             if ($("#agent").val() == "") {
 
                 //alert("Please enter Agent Code");
@@ -250,7 +272,7 @@
                 $("#agent").focus();
             } else {
                 AgentCode = $("#agent").val();
-
+                //----endpoint request------
                 $.ajax({
                     url: APIServer + 
                         "/getOnlineAgentByAgentCode?agentcode=" +
@@ -315,36 +337,14 @@
                         $('#connectTime').empty().append('Agent not found');
                     }
                 });
-        function changeAgentStatus(SelectElement) {
-            var selectedValue = SelectElement.value;
 
-            var formData = new FormData();
-            formData.append("AgentCode", "9999");
-            formData.append("AgentName", "Test Agent 9999");
-            formData.append("IsLogin", "1");
-            formData.append("AgentStatus", selectedValue);
-
-            $.ajax({
-                type: "POST",
-                url: APIServer + "/postOnlineAgentStatus",
-                headers: {
-                    Authorization: "Bearer 1aaZ!ARgAQGuQzp00D5D000000.mOv2jmhXkfIsjgywpCIh7.HZpc6vED1LCbc90DTaVDJwdNqbTW5r4uZicv8AFfkOE1ialqnR8UN5.wnAgh090h"
-                },
-                data: formData,
-                success: function (result) {
-                    console.log("postOnlineAgentStatus: " + result);
-                },
-                processData: false,
-                contentType: false,
-            });
-
-        }
+    }
 
 
                 console.log(wsChecks);
 
             }
-        }
+        
 
         function firstLogin(d) {
             // connectSocket = true;
@@ -558,6 +558,38 @@
             processData: false,
             contentType: false,
         });
+        // var formData2 = new FormData();
+        //     formData.append("AgentCode", "0001");
+        //     formData.append("AgentName", "test2");
+        //     formData.append("Queue", "1");
+        //     formData.append("AgentStatus", selectedValue); //selectedValue
+        //     ormData.append("AgentStatusCode", 1);
+        //     ormData.append("IsLogin", 1);
+            //---parseserver---//
+            $.ajax({
+                type: "POST",
+                url: parseServer + "/functions/postOnlineAgentListByTeam",
+                headers: {
+                    "X-Parse-Application-Id" : devAPI.appId,
+                    "X-Parse-Master-Key" : devAPI.masterKey
+                },
+
+                data: {
+                "AgentCode":"0002",
+                "AgentName":"test2",
+                "Queue":"0",
+                "AgentStatus":selectedValue,
+                "AgentStatusCode":"5",
+                "IsLogin":"1"
+
+                },
+                success: function (result) {
+                    console.log("postOnlineAgentListByTeam: " + result);
+                },
+                // processData: false,
+                // contentType: 'application/json',
+            });
+
     }
 
         function websocketConnect(status) {
